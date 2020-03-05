@@ -3,9 +3,9 @@ import Recipient from '../models/Recipient';
 
 class RecipientController {
   async index(req, res) {
-    const recipients = Recipient.get();
+    const recipients = await Recipient.findAll();
 
-    return res.status(200).json({ recipients });
+    return res.status(200).json(recipients);
   }
 
   async store(req, res) {
@@ -29,7 +29,7 @@ class RecipientController {
 
     const recipient = await Recipient.create(req.body);
 
-    return res.status(201).json({ recipient });
+    return res.status(201).json(recipient);
   }
 
   async update(req, res) {
@@ -51,9 +51,25 @@ class RecipientController {
       return res.status(401).json({ error: 'Validation is fails' });
     }
 
-    const recipient = await Recipient.update(req.body);
+    const { id } = req.params;
+
+    const recipient = await Recipient.findByPk(id);
+
+    await recipient.update(req.body);
 
     return res.status(200).json({ recipient });
+  }
+
+  async delete(req, res) {
+    const recipient = await Recipient.findByPk(req.params.id);
+
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient not found' });
+    }
+
+    recipient.destroy();
+
+    return res.status(200).json({ message: 'Recipient deleted with success' });
   }
 }
 
